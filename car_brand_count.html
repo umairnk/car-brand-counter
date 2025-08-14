@@ -2,182 +2,196 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Car Spotter Counter</title>
+<title>Car Brand Counter</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #e3f2fd;
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    margin: 0;
-  }
-
-  /* Buttons section */
-  .buttons {
-    flex: 3;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
-    padding: 10px;
-    overflow-y: auto;
-    box-sizing: border-box;
-  }
-
-  button.brand {
-    font-size: 18px;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: transform 0.1s;
-    user-select: none;
-  }
-
-  button.brand:active {
-    transform: scale(0.95);
-    background-color: #bbdefb;
-  }
-
-  /* Leaderboard section */
-  .leaderboard {
-    flex: 1;
-    background: white;
-    border-left: 2px solid #90caf9;
-    padding: 10px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .leaderboard h2 {
-    margin: 0 0 10px 0;
-    font-size: 20px;
-    text-align: center;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 16px;
-  }
-  th, td {
-    padding: 8px;
-    text-align: left;
-  }
-  th {
-    background-color: #bbdefb;
-    position: sticky;
-    top: 0;
-  }
-
-  .controls {
-    display: flex;
-    gap: 5px;
-    margin-top: auto;
-  }
-  .controls button {
-    flex: 1;
-    font-size: 14px;
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    background-color: #90caf9;
-    color: white;
-    cursor: pointer;
-  }
-  .controls button:active {
-    background-color: #64b5f6;
-  }
-
-  /* Mobile stacking */
-  @media (max-width: 768px) {
     body {
-      flex-direction: column;
+        font-family: Arial, sans-serif;
+        display: flex;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
     }
-    .leaderboard {
-      border-left: none;
-      border-top: 2px solid #90caf9;
-      flex: none;
+    .container {
+        flex: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
     }
-  }
+    .brand-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 110px;
+        height: 110px;
+        background-color: white;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        cursor: pointer;
+        text-align: center;
+        padding: 10px;
+        box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
+        transition: transform 0.1s;
+    }
+    .brand-btn:hover {
+        transform: scale(1.05);
+    }
+    .brand-btn img {
+        max-width: 60px;
+        max-height: 40px;
+        margin-bottom: 5px;
+    }
+    .sidebar {
+        flex: 1;
+        margin-left: 20px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        background-color: white;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: left;
+    }
+    th {
+        background-color: #eee;
+    }
+    td img {
+        max-width: 20px;
+        max-height: 15px;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+    .controls {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    button {
+        padding: 8px;
+        font-size: 14px;
+        cursor: pointer;
+    }
 </style>
 </head>
 <body>
 
-<div class="buttons" id="brandButtons"></div>
+<div class="container" id="brandContainer"></div>
 
-<div class="leaderboard">
-  <h2>Top Sightings</h2>
-  <table id="leaderTable">
-    <thead>
-      <tr><th>Brand</th><th>Count</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <div class="controls">
-    <button onclick="resetCounts()">Reset All</button>
-    <button onclick="goFullscreen()">Fullscreen</button>
-  </div>
+<div class="sidebar">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard">
+        <thead>
+            <tr>
+                <th>Brand</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="controls">
+        <button onclick="undoLast()">Undo Last Press</button>
+        <button onclick="resetAll()">Reset All</button>
+        <button onclick="undoReset()">Undo Reset</button>
+    </div>
 </div>
 
 <script>
-const carBrands = ["BMW", "Mercedes", "Audi", "Toyota", "Honda", "Ford", "Kia", "Hyundai", "Nissan", "Volkswagen"];
-let counts = JSON.parse(localStorage.getItem("carCounts")) || {};
+const logoFiles = [
+    "bmw.png",
+    "ford.png",
+    "honda.png",
+    "mazda.png",
+    "porsche.png",
+    "tesla.png",
+    "toyota.png",
+    "audi.jpg",
+    "ds.jpg",
+    "fiat.jpg",
+    "hyundai.jpg",
+    "kia.jpg",
+    "mercedes-benz.jpg",
+    "mg.jpg",
+    "mini.jpg",
+    "mitsubishi.jpg",
+    "opel.jpg",
+    "peugeot.jpg",
+    "renault.jpg",
+    "seat.jpg",
+    "skoda.jpg",
+    "volkswagen.jpg",
+    "volvo.jpg"
+];
 
-carBrands.forEach(b => { if (!(b in counts)) counts[b] = 0; });
+let counts = {};
+let lastAction = null;
+let resetBackup = null;
 
-function saveCounts() {
-  localStorage.setItem("carCounts", JSON.stringify(counts));
-}
+// Initialize counts
+logoFiles.forEach(file => {
+    const brand = file.split('.')[0].toUpperCase();
+    counts[brand] = 0;
+});
+
+// Build buttons
+const container = document.getElementById('brandContainer');
+logoFiles.forEach(file => {
+    const brand = file.split('.')[0].toUpperCase();
+    const btn = document.createElement('div');
+    btn.className = 'brand-btn';
+    btn.innerHTML = `<img src="logos/${file}" alt="${brand}"><span>${brand}</span>`;
+    btn.onclick = () => {
+        counts[brand]++;
+        lastAction = { type: 'increment', brand: brand };
+        updateLeaderboard();
+    };
+    container.appendChild(btn);
+});
 
 function updateLeaderboard() {
-  const tbody = document.querySelector("#leaderTable tbody");
-  tbody.innerHTML = "";
-  let sorted = [...carBrands].sort((a, b) => counts[b] - counts[a]);
-  sorted.forEach((brand, index) => {
-    const row = document.createElement("tr");
-    let crown = index === 0 && counts[brand] > 0 ? "👑 " : "";
-    row.innerHTML = `<td>${crown}${brand}</td><td>${counts[brand]}</td>`;
-    tbody.appendChild(row);
-  });
+    const tbody = document.querySelector('#leaderboard tbody');
+    tbody.innerHTML = '';
+    Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([brand, count]) => {
+            const file = logoFiles.find(f => f.split('.')[0].toUpperCase() === brand);
+            const row = document.createElement('tr');
+            row.innerHTML = `<td><img src="logos/${file}" alt="${brand}">${brand}</td><td>${count}</td>`;
+            tbody.appendChild(row);
+        });
 }
 
-function handleClick(brand) {
-  counts[brand]++;
-  saveCounts();
-  updateLeaderboard();
+function undoLast() {
+    if (lastAction && lastAction.type === 'increment') {
+        if (counts[lastAction.brand] > 0) {
+            counts[lastAction.brand]--;
+        }
+        lastAction = null;
+        updateLeaderboard();
+    }
 }
 
-function resetCounts() {
-  carBrands.forEach(b => counts[b] = 0);
-  saveCounts();
-  updateLeaderboard();
+function resetAll() {
+    resetBackup = { ...counts };
+    for (let brand in counts) {
+        counts[brand] = 0;
+    }
+    lastAction = { type: 'reset' };
+    updateLeaderboard();
 }
 
-function goFullscreen() {
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen();
-  } else if (document.documentElement.webkitRequestFullscreen) {
-    document.documentElement.webkitRequestFullscreen();
-  }
+function undoReset() {
+    if (lastAction && lastAction.type === 'reset' && resetBackup) {
+        counts = { ...resetBackup };
+        resetBackup = null;
+        lastAction = null;
+        updateLeaderboard();
+    }
 }
 
-function initButtons() {
-  const container = document.getElementById("brandButtons");
-  carBrands.forEach(brand => {
-    const btn = document.createElement("button");
-    btn.textContent = brand;
-    btn.className = "brand";
-    btn.onclick = () => handleClick(brand);
-    container.appendChild(btn);
-  });
-}
-
-initButtons();
 updateLeaderboard();
 </script>
 

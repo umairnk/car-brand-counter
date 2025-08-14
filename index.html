@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Car Brand Counter</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+    }
+    .container {
+        flex: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .brand-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 110px;
+        height: 110px;
+        background-color: white;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        cursor: pointer;
+        text-align: center;
+        padding: 10px;
+        box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
+        transition: transform 0.1s;
+    }
+    .brand-btn:hover {
+        transform: scale(1.05);
+    }
+    .brand-btn img {
+        max-width: 60px;
+        max-height: 40px;
+        margin-bottom: 5px;
+    }
+    .sidebar {
+        flex: 1;
+        margin-left: 20px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        background-color: white;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: left;
+    }
+    th {
+        background-color: #eee;
+    }
+    td img {
+        max-width: 20px;
+        max-height: 15px;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+    .controls {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    button {
+        padding: 8px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<div class="container" id="brandContainer"></div>
+
+<div class="sidebar">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard">
+        <thead>
+            <tr>
+                <th>Brand</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="controls">
+        <button onclick="undoLast()">Undo Last Press</button>
+        <button onclick="resetAll()">Reset All</button>
+        <button onclick="undoReset()">Undo Reset</button>
+    </div>
+</div>
+
+<script>
+const logoFiles = [
+    "bmw.png",
+    "ford.png",
+    "honda.png",
+    "mazda.png",
+    "porsche.png",
+    "tesla.png",
+    "toyota.png",
+    "audi.jpg",
+    "ds.jpg",
+    "fiat.jpg",
+    "hyundai.jpg",
+    "kia.jpg",
+    "mercedes-benz.jpg",
+    "mg.jpg",
+    "mini.jpg",
+    "mitsubishi.jpg",
+    "opel.jpg",
+    "peugeot.jpg",
+    "renault.jpg",
+    "seat.jpg",
+    "skoda.jpg",
+    "volkswagen.jpg",
+    "volvo.jpg"
+];
+
+let counts = {};
+let lastAction = null;
+let resetBackup = null;
+
+// Initialize counts
+logoFiles.forEach(file => {
+    const brand = file.split('.')[0].toUpperCase();
+    counts[brand] = 0;
+});
+
+// Build buttons
+const container = document.getElementById('brandContainer');
+logoFiles.forEach(file => {
+    const brand = file.split('.')[0].toUpperCase();
+    const btn = document.createElement('div');
+    btn.className = 'brand-btn';
+    btn.innerHTML = `<img src="logos/${file}" alt="${brand}"><span>${brand}</span>`;
+    btn.onclick = () => {
+        counts[brand]++;
+        lastAction = { type: 'increment', brand: brand };
+        updateLeaderboard();
+    };
+    container.appendChild(btn);
+});
+
+function updateLeaderboard() {
+    const tbody = document.querySelector('#leaderboard tbody');
+    tbody.innerHTML = '';
+    Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([brand, count]) => {
+            const file = logoFiles.find(f => f.split('.')[0].toUpperCase() === brand);
+            const row = document.createElement('tr');
+            row.innerHTML = `<td><img src="logos/${file}" alt="${brand}">${brand}</td><td>${count}</td>`;
+            tbody.appendChild(row);
+        });
+}
+
+function undoLast() {
+    if (lastAction && lastAction.type === 'increment') {
+        if (counts[lastAction.brand] > 0) {
+            counts[lastAction.brand]--;
+        }
+        lastAction = null;
+        updateLeaderboard();
+    }
+}
+
+function resetAll() {
+    resetBackup = { ...counts };
+    for (let brand in counts) {
+        counts[brand] = 0;
+    }
+    lastAction = { type: 'reset' };
+    updateLeaderboard();
+}
+
+function undoReset() {
+    if (lastAction && lastAction.type === 'reset' && resetBackup) {
+        counts = { ...resetBackup };
+        resetBackup = null;
+        lastAction = null;
+        updateLeaderboard();
+    }
+}
+
+updateLeaderboard();
+</script>
+
+</body>
+</html>

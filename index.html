@@ -2,79 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Car Brand Counter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Brand Spotting Counter</title>
+
+<!-- App Icons & Manifest -->
+<link rel="icon" href="logos/app_icon.png">
+<link rel="apple-touch-icon" href="logos/app_icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        background-color: #f0f0f0;
-        margin: 0;
-        padding: 20px;
-    }
-    .container {
-        flex: 2;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .brand-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 110px;
-        height: 110px;
-        background-color: white;
-        border: 2px solid #ccc;
-        border-radius: 50%;
-        cursor: pointer;
-        text-align: center;
-        padding: 10px;
-        box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
-        transition: transform 0.1s;
-    }
-    .brand-btn:hover {
-        transform: scale(1.05);
-    }
-    .brand-btn img {
-        max-width: 60px;
-        max-height: 40px;
-        margin-bottom: 5px;
-    }
-    .sidebar {
-        flex: 1;
-        margin-left: 20px;
-    }
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        background-color: white;
-    }
-    th, td {
-        border: 1px solid #ccc;
-        padding: 6px;
-        text-align: left;
-    }
-    th {
-        background-color: #eee;
-    }
-    td img {
-        max-width: 20px;
-        max-height: 15px;
-        margin-right: 5px;
-        vertical-align: middle;
-    }
-    .controls {
-        margin-top: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    button {
-        padding: 8px;
-        font-size: 14px;
-        cursor: pointer;
-    }
+body {
+  display: flex;
+  flex-direction: row;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  flex: 1;
+}
+.brand-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.brand-btn img {
+  max-width: 50px;
+  max-height: 50px;
+  margin-bottom: 5px;
+}
+.sidebar {
+  width: 250px;
+  padding: 10px;
+  border-left: 2px solid #ddd;
+}
+.sidebar h2 {
+  margin-top: 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table td {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+}
+table td img {
+  width: 20px;
+  height: auto;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+button.action-btn {
+  margin: 5px 0;
+  padding: 8px;
+  width: 100%;
+}
+
+/* Mobile Portrait Mode */
+@media (max-width: 600px) {
+  body {
+    flex-direction: column;
+  }
+  .container {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  }
+  .brand-btn {
+    width: 90px;
+    height: 90px;
+  }
+  .brand-btn img {
+    max-width: 40px;
+    max-height: 40px;
+  }
+  .sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 2px solid #ddd;
+  }
+}
 </style>
 </head>
 <body>
@@ -82,114 +101,88 @@
 <div class="container" id="brandContainer"></div>
 
 <div class="sidebar">
-    <h2>Leaderboard</h2>
-    <table id="leaderboard">
-        <thead>
-            <tr>
-                <th>Brand</th>
-                <th>Count</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <div class="controls">
-        <button onclick="undoLast()">Undo Last Press</button>
-        <button onclick="resetAll()">Reset All</button>
-        <button onclick="undoReset()">Undo Reset</button>
-    </div>
+  <h2>Leaderboard</h2>
+  <table id="leaderboard"></table>
+  <button class="action-btn" onclick="resetAll()">Reset All</button>
+  <button class="action-btn" onclick="undoReset()">Undo Reset</button>
+  <button class="action-btn" onclick="undoBrand()">Undo Brand Click</button>
 </div>
 
 <script>
-const logoFiles = [
-    "bmw.png",
-    "ford.png",
-    "honda.png",
-    "mazda.png",
-    "porsche.png",
-    "tesla.png",
-    "toyota.png",
-    "audi.jpg",
-    "ds.jpg",
-    "fiat.jpg",
-    "hyundai.jpg",
-    "kia.jpg",
-    "mercedes-benz.jpg",
-    "mg.jpg",
-    "mini.jpg",
-    "mitsubishi.jpg",
-    "opel.jpg",
-    "peugeot.jpg",
-    "renault.jpg",
-    "seat.jpg",
-    "skoda.jpg",
-    "volkswagen.jpg",
-    "volvo.jpg"
+const brands = [
+  "bmw.png","ford.png","honda.png","mazda.png","porsche.png","tesla.png","toyota.png",
+  "audi.jpg","ds.jpg","fiat.jpg","hyundai.jpg","kia.jpg","mercedes-benz.jpg","mg.jpg",
+  "mini.jpg","mitsubishi.jpg","opel.jpg","peugeot.jpg","renault.jpg","seat.jpg",
+  "skoda.jpg","volkswagen.jpg","volvo.jpg"
 ];
 
 let counts = {};
-let lastAction = null;
+let lastBrand = null;
 let resetBackup = null;
 
-// Initialize counts
-logoFiles.forEach(file => {
-    const brand = file.split('.')[0].toUpperCase();
-    counts[brand] = 0;
-});
-
-// Build buttons
+// Initialize buttons
 const container = document.getElementById('brandContainer');
-logoFiles.forEach(file => {
-    const brand = file.split('.')[0].toUpperCase();
-    const btn = document.createElement('div');
-    btn.className = 'brand-btn';
-    btn.innerHTML = `<img src="logos/${file}" alt="${brand}"><span>${brand}</span>`;
-    btn.onclick = () => {
-        counts[brand]++;
-        lastAction = { type: 'increment', brand: brand };
-        updateLeaderboard();
-    };
-    container.appendChild(btn);
+brands.forEach(file => {
+  const brandName = file.split('.')[0].toUpperCase();
+  counts[brandName] = 0;
+
+  const btn = document.createElement('button');
+  btn.className = 'brand-btn';
+  btn.onclick = () => {
+    counts[brandName]++;
+    lastBrand = brandName;
+    updateLeaderboard();
+  };
+
+  const img = document.createElement('img');
+  img.src = 'logos/' + file;
+  img.alt = brandName;
+
+  btn.appendChild(img);
+  btn.appendChild(document.createTextNode(brandName));
+  container.appendChild(btn);
 });
 
 function updateLeaderboard() {
-    const tbody = document.querySelector('#leaderboard tbody');
-    tbody.innerHTML = '';
-    Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([brand, count]) => {
-            const file = logoFiles.find(f => f.split('.')[0].toUpperCase() === brand);
-            const row = document.createElement('tr');
-            row.innerHTML = `<td><img src="logos/${file}" alt="${brand}">${brand}</td><td>${count}</td>`;
-            tbody.appendChild(row);
-        });
-}
-
-function undoLast() {
-    if (lastAction && lastAction.type === 'increment') {
-        if (counts[lastAction.brand] > 0) {
-            counts[lastAction.brand]--;
-        }
-        lastAction = null;
-        updateLeaderboard();
-    }
+  const leaderboard = document.getElementById('leaderboard');
+  leaderboard.innerHTML = '';
+  Object.entries(counts)
+    .sort((a,b) => b[1] - a[1])
+    .forEach(([brand, count]) => {
+      const row = document.createElement('tr');
+      const brandCell = document.createElement('td');
+      const img = document.createElement('img');
+      img.src = 'logos/' + brands.find(f => f.split('.')[0].toUpperCase() === brand);
+      brandCell.appendChild(img);
+      brandCell.appendChild(document.createTextNode(brand));
+      const countCell = document.createElement('td');
+      countCell.textContent = count;
+      row.appendChild(brandCell);
+      row.appendChild(countCell);
+      leaderboard.appendChild(row);
+    });
 }
 
 function resetAll() {
-    resetBackup = { ...counts };
-    for (let brand in counts) {
-        counts[brand] = 0;
-    }
-    lastAction = { type: 'reset' };
-    updateLeaderboard();
+  resetBackup = {...counts};
+  Object.keys(counts).forEach(b => counts[b] = 0);
+  updateLeaderboard();
 }
 
 function undoReset() {
-    if (lastAction && lastAction.type === 'reset' && resetBackup) {
-        counts = { ...resetBackup };
-        resetBackup = null;
-        lastAction = null;
-        updateLeaderboard();
-    }
+  if (resetBackup) {
+    counts = {...resetBackup};
+    resetBackup = null;
+    updateLeaderboard();
+  }
+}
+
+function undoBrand() {
+  if (lastBrand && counts[lastBrand] > 0) {
+    counts[lastBrand]--;
+    lastBrand = null;
+    updateLeaderboard();
+  }
 }
 
 updateLeaderboard();

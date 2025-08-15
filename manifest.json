@@ -1,0 +1,15 @@
+{
+  "short_name": "CarCounter",
+  "name": "Car Brand Spotting Counter",
+  "icons": [
+    {
+      "src": "logos/app_icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#e3f2fd",
+  "background_color": "#e3f2fd"
+}

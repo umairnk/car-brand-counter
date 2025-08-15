@@ -1,192 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Car Brand Spotting Counter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Car Counter">
+  <link rel="apple-touch-icon" href="logos/app_icon.png">
+  <title>Car Brand Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
 
-<!-- App Icons & Manifest -->
-<link rel="icon" href="logos/app_icon.png">
-<link rel="apple-touch-icon" href="logos/app_icon.png">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    h1 {
+      margin: 10px 0;
+    }
 
-<style>
-body {
-  display: flex;
-  flex-direction: row;
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-  padding: 10px;
-  flex: 1;
-}
-.brand-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-.brand-btn img {
-  max-width: 50px;
-  max-height: 50px;
-  margin-bottom: 5px;
-}
-.sidebar {
-  width: 250px;
-  padding: 10px;
-  border-left: 2px solid #ddd;
-}
-.sidebar h2 {
-  margin-top: 0;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-table td {
-  padding: 5px;
-  border-bottom: 1px solid #ccc;
-}
-table td img {
-  width: 20px;
-  height: auto;
-  vertical-align: middle;
-  margin-right: 5px;
-}
-button.action-btn {
-  margin: 5px 0;
-  padding: 8px;
-  width: 100%;
-}
+    .button-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 10px;
+      justify-items: center;
+      padding: 10px;
+    }
 
-/* Mobile Portrait Mode */
-@media (max-width: 600px) {
-  body {
-    flex-direction: column;
-  }
-  .container {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  }
-  .brand-btn {
-    width: 90px;
-    height: 90px;
-  }
-  .brand-btn img {
-    max-width: 40px;
-    max-height: 40px;
-  }
-  .sidebar {
-    width: 100%;
-    border-left: none;
-    border-top: 2px solid #ddd;
-  }
-}
-</style>
+    /* Force exactly 5 per row on bigger portrait screens */
+    @media (min-width: 400px) {
+      .button-container {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .car-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 5px;
+      width: 60px;
+      height: 60px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .car-button img {
+      max-width: 30px;
+      max-height: 30px;
+      margin-bottom: 3px;
+    }
+
+    .car-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Slightly bigger buttons for smaller screens */
+    @media (max-width: 390px) {
+      .car-button {
+        width: 70px;
+        height: 70px;
+        font-size: 11px;
+      }
+      .car-button img {
+        max-width: 35px;
+        max-height: 35px;
+      }
+    }
+
+    .leaderboard {
+      margin-top: 15px;
+      padding: 0 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    td img {
+      width: 20px;
+      height: auto;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container" id="brandContainer"></div>
+  <h1>Car Brand Counter</h1>
 
-<div class="sidebar">
-  <h2>Leaderboard</h2>
-  <table id="leaderboard"></table>
-  <button class="action-btn" onclick="resetAll()">Reset All</button>
-  <button class="action-btn" onclick="undoReset()">Undo Reset</button>
-  <button class="action-btn" onclick="undoBrand()">Undo Brand Click</button>
-</div>
+  <div class="button-container" id="buttonContainer"></div>
 
-<script>
-const brands = [
-  "bmw.png","ford.png","honda.png","mazda.png","porsche.png","tesla.png","toyota.png",
-  "audi.jpg","ds.jpg","fiat.jpg","hyundai.jpg","kia.jpg","mercedes-benz.jpg","mg.jpg",
-  "mini.jpg","mitsubishi.jpg","opel.jpg","peugeot.jpg","renault.jpg","seat.jpg",
-  "skoda.jpg","volkswagen.jpg","volvo.jpg"
-];
+  <div class="leaderboard">
+    <h2>Leaderboard</h2>
+    <table id="leaderboardTable">
+      <thead>
+        <tr>
+          <th>Brand</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-let counts = {};
-let lastBrand = null;
-let resetBackup = null;
+  <script>
+    const carBrands = [
+      { name: "Audi", logo: "logos/audi.jpg" },
+      { name: "BMW", logo: "logos/bmw.png" },
+      { name: "DS", logo: "logos/ds.jpg" },
+      { name: "Fiat", logo: "logos/fiat.jpg" },
+      { name: "Ford", logo: "logos/ford.png" },
+      { name: "Honda", logo: "logos/honda.png" },
+      { name: "Hyundai", logo: "logos/hyundai.jpg" },
+      { name: "Kia", logo: "logos/kia.jpg" },
+      { name: "Mazda", logo: "logos/mazda.png" },
+      { name: "Mercedes-Benz", logo: "logos/mercedes-benz.jpg" },
+      { name: "MG", logo: "logos/mg.jpg" },
+      { name: "Mini", logo: "logos/mini.jpg" },
+      { name: "Mitsubishi", logo: "logos/mitsubishi.jpg" },
+      { name: "Opel", logo: "logos/opel.jpg" },
+      { name: "Peugeot", logo: "logos/peugeot.jpg" },
+      { name: "Porsche", logo: "logos/porsche.png" },
+      { name: "Renault", logo: "logos/renault.jpg" },
+      { name: "Seat", logo: "logos/seat.jpg" },
+      { name: "Skoda", logo: "logos/skoda.jpg" },
+      { name: "Tesla", logo: "logos/tesla.png" },
+      { name: "Toyota", logo: "logos/toyota.png" },
+      { name: "Volkswagen", logo: "logos/volkswagen.jpg" },
+      { name: "Volvo", logo: "logos/volvo.jpg" }
+    ].sort((a, b) => a.name.localeCompare(b.name)); // Alphabetical order
 
-// Initialize buttons
-const container = document.getElementById('brandContainer');
-brands.forEach(file => {
-  const brandName = file.split('.')[0].toUpperCase();
-  counts[brandName] = 0;
+    let counts = {};
 
-  const btn = document.createElement('button');
-  btn.className = 'brand-btn';
-  btn.onclick = () => {
-    counts[brandName]++;
-    lastBrand = brandName;
-    updateLeaderboard();
-  };
+    const buttonContainer = document.getElementById("buttonContainer");
+    const leaderboardTableBody = document.querySelector("#leaderboardTable tbody");
 
-  const img = document.createElement('img');
-  img.src = 'logos/' + file;
-  img.alt = brandName;
+    function updateLeaderboard() {
+      leaderboardTableBody.innerHTML = "";
+      const sortedCounts = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1]);
+      sortedCounts.forEach(([brand, count]) => {
+        const brandData = carBrands.find(b => b.name === brand);
+        const row = document.createElement("tr");
+        const brandCell = document.createElement("td");
+        brandCell.innerHTML = `<img src="${brandData.logo}" alt="${brand}"> ${brand}`;
+        const countCell = document.createElement("td");
+        countCell.textContent = count;
+        row.appendChild(brandCell);
+        row.appendChild(countCell);
+        leaderboardTableBody.appendChild(row);
+      });
+    }
 
-  btn.appendChild(img);
-  btn.appendChild(document.createTextNode(brandName));
-  container.appendChild(btn);
-});
-
-function updateLeaderboard() {
-  const leaderboard = document.getElementById('leaderboard');
-  leaderboard.innerHTML = '';
-  Object.entries(counts)
-    .sort((a,b) => b[1] - a[1])
-    .forEach(([brand, count]) => {
-      const row = document.createElement('tr');
-      const brandCell = document.createElement('td');
-      const img = document.createElement('img');
-      img.src = 'logos/' + brands.find(f => f.split('.')[0].toUpperCase() === brand);
-      brandCell.appendChild(img);
-      brandCell.appendChild(document.createTextNode(brand));
-      const countCell = document.createElement('td');
-      countCell.textContent = count;
-      row.appendChild(brandCell);
-      row.appendChild(countCell);
-      leaderboard.appendChild(row);
+    carBrands.forEach(brand => {
+      counts[brand.name] = 0;
+      const btn = document.createElement("button");
+      btn.className = "car-button";
+      btn.innerHTML = `<img src="${brand.logo}" alt="${brand.name}"><span>${brand.name.toUpperCase()}</span>`;
+      btn.addEventListener("click", () => {
+        counts[brand.name]++;
+        updateLeaderboard();
+      });
+      buttonContainer.appendChild(btn);
     });
-}
 
-function resetAll() {
-  resetBackup = {...counts};
-  Object.keys(counts).forEach(b => counts[b] = 0);
-  updateLeaderboard();
-}
-
-function undoReset() {
-  if (resetBackup) {
-    counts = {...resetBackup};
-    resetBackup = null;
     updateLeaderboard();
-  }
-}
-
-function undoBrand() {
-  if (lastBrand && counts[lastBrand] > 0) {
-    counts[lastBrand]--;
-    lastBrand = null;
-    updateLeaderboard();
-  }
-}
-
-updateLeaderboard();
-</script>
-
+  </script>
 </body>
 </html>
